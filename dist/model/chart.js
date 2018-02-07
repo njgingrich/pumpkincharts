@@ -1,12 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var d3 = require("d3");
-var DataType;
-(function (DataType) {
-    DataType[DataType["POINTS"] = 0] = "POINTS";
-    DataType[DataType["COLUMNS"] = 1] = "COLUMNS";
-    DataType[DataType["ROWS"] = 2] = "ROWS";
-})(DataType = exports.DataType || (exports.DataType = {}));
+var data_1 = require("../interface/data");
+var scale_1 = require("./scale");
+var line_1 = require("./line");
 var defaultOptions = {
     width: 900,
     height: 500,
@@ -26,15 +23,15 @@ var Chart = /** @class */ (function () {
         this.chart = {};
         if (opts.data.columns) {
             this.data = opts.data.columns;
-            this.dataType = DataType.COLUMNS;
+            this.dataType = data_1.DataType.COLUMNS;
         }
         else if (opts.data.rows) {
             this.data = opts.data.rows;
-            this.dataType = DataType.ROWS;
+            this.dataType = data_1.DataType.ROWS;
         }
         else if (opts.data.points) {
             this.data = opts.data.points;
-            this.dataType = DataType.POINTS;
+            this.dataType = data_1.DataType.POINTS;
         }
         else {
             throw new Error('No valid data type found');
@@ -72,16 +69,16 @@ var Chart = /** @class */ (function () {
         var yScale;
         var lineFunctions;
         switch (this.dataType) {
-            case DataType.POINTS: {
-                xScale = this.xScalePoints([MARGIN.LEFT, WIDTH - MARGIN.RIGHT]);
-                yScale = this.yScalePoints([HEIGHT - MARGIN.TOP, MARGIN.BOTTOM]);
-                lineFunctions = this.linesFromPoints(xScale, yScale);
+            case data_1.DataType.POINTS: {
+                xScale = scale_1.xScalePoints(this.data, [MARGIN.LEFT, WIDTH - MARGIN.RIGHT]);
+                yScale = scale_1.yScalePoints(this.data, [HEIGHT - MARGIN.TOP, MARGIN.BOTTOM]);
+                lineFunctions = line_1.linesFromPoints(this.data, xScale, yScale);
                 break;
             }
-            case DataType.COLUMNS: {
-                xScale = this.xScaleColumns([MARGIN.LEFT, WIDTH - MARGIN.RIGHT]);
-                yScale = this.yScaleColumns([HEIGHT - MARGIN.TOP, MARGIN.BOTTOM]);
-                lineFunctions = this.linesFromColumns(xScale, yScale);
+            case data_1.DataType.COLUMNS: {
+                xScale = scale_1.xScaleColumns(this.data, [MARGIN.LEFT, WIDTH - MARGIN.RIGHT]);
+                yScale = scale_1.yScaleColumns(this.data, [HEIGHT - MARGIN.TOP, MARGIN.BOTTOM]);
+                lineFunctions = line_1.linesFromColumns(this.data, xScale, yScale);
                 break;
             }
             default: {
@@ -100,89 +97,14 @@ var Chart = /** @class */ (function () {
             .attr('class', 'y axis')
             .attr('transform', "translate(" + MARGIN.LEFT + ", 0)")
             .call(yAxis);
-        if (this.dataType === DataType.POINTS) {
-            var lineFunction = d3
-                .line()
-                .x(function (d) { return xScale(Number(d.x)); })
-                .y(function (d) { return yScale(Number(d.y)); });
+        for (var i = 0; i < lineFunctions.length; i++) {
             this.chart
                 .append('path')
-                .attr('d', lineFunction(this.data))
+                .attr('d', lineFunctions[i](this.data[i]))
                 .attr('stroke', this.options.strokes[0])
                 .attr('stroke-width', 2)
                 .attr('fill', 'none');
         }
-        else if (this.dataType === DataType.COLUMNS) {
-            for (var i = 0; i < lineFunctions.length; i++) {
-                this.chart
-                    .append('path')
-                    .attr('d', lineFunctions[i](this.data[i]))
-                    .attr('stroke', this.options.strokes[0])
-                    .attr('stroke-width', 2)
-                    .attr('fill', 'none');
-            }
-        }
-    };
-    Chart.prototype.xScalePoints = function (range) {
-        return d3
-            .scaleLinear()
-            .range(range)
-            .domain([
-            d3.min(this.data, function (d) { return d.x; }) * 1,
-            d3.max(this.data, function (d) { return d.x; }) * 1,
-        ]);
-    };
-    Chart.prototype.xScaleColumns = function (range) {
-        var longest = this.data
-            .map(function (a) { return a.length; })
-            .reduce(function (max, cur) { return Math.max(max, cur); }, 0);
-        return d3
-            .scaleLinear()
-            .range(range)
-            .domain([0, longest]);
-    };
-    Chart.prototype.yScalePoints = function (range) {
-        return d3
-            .scaleLinear()
-            .range(range)
-            .domain([
-            d3.min(this.data, function (d) { return d.y; }) * 1,
-            d3.max(this.data, function (d) { return d.y; }) * 1,
-        ]);
-    };
-    Chart.prototype.yScaleColumns = function (range) {
-        var min = this.data
-            .map(function (a) { return Math.min.apply(Math, a); })
-            .reduce(function (max, cur) { return Math.min(max, cur); }, 0);
-        var max = this.data
-            .map(function (a) { return Math.max.apply(Math, a); })
-            .reduce(function (max, cur) { return Math.max(max, cur); }, 0);
-        return d3
-            .scaleLinear()
-            .range(range)
-            .domain([min, max]);
-    };
-    Chart.prototype.linesFromPoints = function (xScale, yScale) {
-        var funcs = [];
-        funcs.push(d3
-            .line()
-            .x(function (d) { return xScale(Number(d.x)); })
-            .y(function (d) { return yScale(Number(d.y)); }));
-        return funcs;
-    };
-    Chart.prototype.linesFromColumns = function (xScale, yScale) {
-        var funcs = [];
-        var _loop_1 = function (col) {
-            funcs.push(d3
-                .line()
-                .x(function (d) { return xScale(col.indexOf(d)); })
-                .y(function (d) { return yScale(Number(d)); }));
-        };
-        for (var _i = 0, _a = this.data; _i < _a.length; _i++) {
-            var col = _a[_i];
-            _loop_1(col);
-        }
-        return funcs;
     };
     return Chart;
 }());

@@ -1,40 +1,15 @@
 import * as d3 from 'd3'
 import { Axis, BaseType, ScaleLinear } from 'd3'
+import { DataType, DataOptions, DataPoint } from '../interface/data'
+import { Options, ClassOptions } from '../interface/options'
+import {
+  xScalePoints,
+  xScaleColumns,
+  yScalePoints,
+  yScaleColumns,
+} from './scale'
 
-export interface Options {
-  width: number
-  height: number
-  parent: SVGElement
-  padding: {
-    top: number
-    bottom: number
-    left: number
-    right: number
-  }
-  strokes: string[]
-}
-
-export interface ChartDatum {
-  x?: number
-  y?: number
-}
-
-export enum DataType {
-  POINTS,
-  COLUMNS,
-  ROWS,
-}
-
-export interface DataOptions {
-  points?: any[]
-  columns: number[][]
-  rows: number[][]
-}
-
-export interface ClassOptions {
-  data: DataOptions
-  options: Options
-}
+import { linesFromPoints, linesFromColumns } from './line'
 
 const defaultOptions = {
   width: 900,
@@ -51,7 +26,7 @@ const defaultOptions = {
 
 export class Chart {
   options: Options
-  data: any[]
+  data: any[][]
   chart: any
   dataType: DataType
 
@@ -105,15 +80,15 @@ export class Chart {
     let lineFunctions: any[]
     switch (this.dataType) {
       case DataType.POINTS: {
-        xScale = this.xScalePoints([MARGIN.LEFT, WIDTH - MARGIN.RIGHT])
-        yScale = this.yScalePoints([HEIGHT - MARGIN.TOP, MARGIN.BOTTOM])
-        lineFunctions = this.linesFromPoints(xScale, yScale)
+        xScale = xScalePoints(this.data, [MARGIN.LEFT, WIDTH - MARGIN.RIGHT])
+        yScale = yScalePoints(this.data, [HEIGHT - MARGIN.TOP, MARGIN.BOTTOM])
+        lineFunctions = linesFromPoints(this.data, xScale, yScale)
         break
       }
       case DataType.COLUMNS: {
-        xScale = this.xScaleColumns([MARGIN.LEFT, WIDTH - MARGIN.RIGHT])
-        yScale = this.yScaleColumns([HEIGHT - MARGIN.TOP, MARGIN.BOTTOM])
-        lineFunctions = this.linesFromColumns(xScale, yScale)
+        xScale = xScaleColumns(this.data, [MARGIN.LEFT, WIDTH - MARGIN.RIGHT])
+        yScale = yScaleColumns(this.data, [HEIGHT - MARGIN.TOP, MARGIN.BOTTOM])
+        lineFunctions = linesFromColumns(this.data, xScale, yScale)
         break
       }
       default: {
@@ -135,101 +110,13 @@ export class Chart {
       .attr('transform', `translate(${MARGIN.LEFT}, 0)`)
       .call(yAxis)
 
-    if (this.dataType === DataType.POINTS) {
-      const lineFunction = d3
-        .line<ChartDatum>()
-        .x(d => xScale(Number(d.x)))
-        .y(d => yScale(Number(d.y)))
+    for (let i = 0; i < lineFunctions.length; i++) {
       this.chart
         .append('path')
-        .attr('d', <any>lineFunction(this.data))
+        .attr('d', <any>lineFunctions[i](this.data[i]))
         .attr('stroke', this.options.strokes[0])
         .attr('stroke-width', 2)
         .attr('fill', 'none')
-    } else if (this.dataType === DataType.COLUMNS) {
-      for (let i = 0; i < lineFunctions.length; i++) {
-        this.chart
-          .append('path')
-          .attr('d', <any>lineFunctions[i](this.data[i]))
-          .attr('stroke', this.options.strokes[0])
-          .attr('stroke-width', 2)
-          .attr('fill', 'none')
-      }
     }
-  }
-
-  private xScalePoints(range: number[]) {
-    return d3
-      .scaleLinear<number>()
-      .range(range)
-      .domain([
-        d3.min(this.data, d => d.x) * 1,
-        d3.max(this.data, d => d.x) * 1,
-      ])
-  }
-
-  private xScaleColumns(range: number[]) {
-    const longest = this.data
-      .map(a => a.length)
-      .reduce((max, cur) => Math.max(max, cur), 0)
-
-    return d3
-      .scaleLinear<number>()
-      .range(range)
-      .domain([0, longest])
-  }
-
-  private yScalePoints(range: number[]) {
-    return d3
-      .scaleLinear<number>()
-      .range(range)
-      .domain([
-        d3.min(this.data, d => d.y) * 1,
-        d3.max(this.data, d => d.y) * 1,
-      ])
-  }
-
-  private yScaleColumns(range: number[]) {
-    let min = this.data
-      .map(a => Math.min(...a))
-      .reduce((max, cur) => Math.min(max, cur), 0)
-    let max = this.data
-      .map(a => Math.max(...a))
-      .reduce((max, cur) => Math.max(max, cur), 0)
-
-    return d3
-      .scaleLinear<number>()
-      .range(range)
-      .domain([min, max])
-  }
-
-  private linesFromPoints(
-    xScale: ScaleLinear<number, number>,
-    yScale: ScaleLinear<number, number>,
-  ) {
-    let funcs = []
-    funcs.push(
-      d3
-        .line<ChartDatum>()
-        .x(d => xScale(Number(d.x)))
-        .y(d => yScale(Number(d.y))),
-    )
-    return funcs
-  }
-
-  private linesFromColumns(
-    xScale: ScaleLinear<number, number>,
-    yScale: ScaleLinear<number, number>,
-  ) {
-    let funcs = []
-    for (let col of this.data) {
-      funcs.push(
-        d3
-          .line<ChartDatum>()
-          .x(d => xScale(col.indexOf(d)))
-          .y(d => yScale(Number(d))),
-      )
-    }
-    return funcs
   }
 }
