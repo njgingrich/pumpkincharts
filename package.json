@@ -1,0 +1,30 @@
+{
+  "name": "pumpkincharts",
+  "version": "0.1.3",
+  "description": "D3 charts library",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/njgingrich/dcharts.git"
+  },
+  "keywords": ["d3", "chart"],
+  "author": "Nathan Gingrich",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/njgingrich/dcharts/issues"
+  },
+  "homepage": "https://github.com/njgingrich/dcharts#readme",
+  "devDependencies": {
+    "@types/d3": "^4.12.0",
+    "eslint-config-prettier": "^2.9.0",
+    "prettier": "1.10.2",
+    "typescript": "^2.7.1"
+  },
+  "dependencies": {
+    "d3": "^4.13.0"
+  }
+}
