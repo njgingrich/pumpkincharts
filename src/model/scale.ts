@@ -3,10 +3,10 @@ import { ScaleLinear } from 'd3'
 import { DataPoint } from '../interface/data'
 
 export function xScalePoints(data: DataPoint[][], range: number[]) {
-  let min = data
+  const min = data
     .map(a => Math.min(...a.map(e => e.x)))
     .reduce((max, cur) => Math.min(max, cur), 0)
-  let max = data
+  const max = data
     .map(a => Math.max(...a.map(e => e.x)))
     .reduce((max, cur) => Math.max(max, cur), 0)
 
@@ -28,10 +28,10 @@ export function xScaleColumns(data: number[][], range: number[]) {
 }
 
 export function yScalePoints(data: DataPoint[][], range: number[]) {
-  let min = data
+  const min = data
     .map(a => Math.min(...a.map(e => e.y)))
-    .reduce((max, cur) => Math.min(max, cur), 0)
-  let max = data
+    .reduce((min, cur) => Math.min(min, cur), 0)
+  const max = data
     .map(a => Math.max(...a.map(e => e.y)))
     .reduce((max, cur) => Math.max(max, cur), 0)
 
@@ -42,10 +42,10 @@ export function yScalePoints(data: DataPoint[][], range: number[]) {
 }
 
 export function yScaleColumns(data: number[][], range: number[]) {
-  let min = data
+  const min = data
     .map(a => Math.min(...a))
-    .reduce((max, cur) => Math.min(max, cur), 0)
-  let max = data
+    .reduce((min, cur) => Math.min(min, cur), 0)
+  const max = data
     .map(a => Math.max(...a))
     .reduce((max, cur) => Math.max(max, cur), 0)
 

@@ -8,17 +8,35 @@ var defaultOptions = {
     width: 900,
     height: 500,
     parent: document.getElementsByTagName('svg')[0],
+    chartType: data_1.ChartType.LINE,
     padding: {
         top: 20,
         bottom: 20,
         left: 20,
         right: 20,
     },
-    strokes: ['blue'],
+    strokes: [
+        'blue',
+        'red',
+        'green',
+        'yellow',
+        'black',
+        'brown',
+        'purple',
+        'orange',
+    ],
+    ticks: {
+        x: function (d) { return d[0].length; },
+        y: function (d) { return d[0].length; },
+    },
+    tickFormats: {
+        x: null,
+        y: null,
+    },
 };
 var Chart = /** @class */ (function () {
     function Chart(opts) {
-        this.options = defaultOptions;
+        this.options = Object.assign({}, defaultOptions, opts.options);
         this.data = [];
         this.chart = {};
         if (opts.data.columns) {
@@ -36,27 +54,21 @@ var Chart = /** @class */ (function () {
         else {
             throw new Error('No valid data type found');
         }
-        if (opts.options.height)
-            this.options.height = opts.options.height;
-        if (opts.options.parent)
-            this.options.parent = opts.options.parent;
-        if (opts.options.strokes)
-            this.options.strokes = opts.options.strokes;
-        if (opts.options.width)
-            this.options.width = opts.options.width;
-        if (opts.options.padding) {
-            if (opts.options.padding.top)
-                this.options.padding.top = opts.options.padding.top;
-            if (opts.options.padding.bottom)
-                this.options.padding.bottom = opts.options.padding.bottom;
-            if (opts.options.padding.left)
-                this.options.padding.left = opts.options.padding.left;
-            if (opts.options.padding.right)
-                this.options.padding.right = opts.options.padding.right;
-        }
+        this.draw(this.options.chartType);
     }
-    Chart.prototype.draw = function () {
+    Chart.prototype.draw = function (chartType) {
         this.chart = d3.select(this.options.parent);
+        this.chart
+            .attr('width', this.options.width)
+            .attr('height', this.options.height);
+        switch (chartType) {
+            case data_1.ChartType.LINE: {
+                this.lineChart();
+                break;
+            }
+        }
+    };
+    Chart.prototype.lineChart = function () {
         var WIDTH = this.options.width;
         var HEIGHT = this.options.height;
         var MARGIN = {
@@ -81,12 +93,31 @@ var Chart = /** @class */ (function () {
                 lineFunctions = line_1.linesFromColumns(this.data, xScale, yScale);
                 break;
             }
+            case data_1.DataType.ROWS: {
+                this.rotateRows();
+                xScale = scale_1.xScaleColumns(this.data, [MARGIN.LEFT, WIDTH - MARGIN.RIGHT]);
+                yScale = scale_1.yScaleColumns(this.data, [HEIGHT - MARGIN.TOP, MARGIN.BOTTOM]);
+                lineFunctions = line_1.linesFromColumns(this.data, xScale, yScale);
+                break;
+            }
             default: {
                 throw new Error('No valid data type found');
             }
         }
-        var xAxis = d3.axisBottom(xScale);
-        var yAxis = d3.axisLeft(yScale);
+        var xAxis;
+        var yAxis;
+        if (typeof this.options.ticks.x === 'function') {
+            xAxis = d3.axisBottom(xScale).ticks(this.options.ticks.x(this.data));
+        }
+        else {
+            xAxis = d3.axisBottom(xScale).ticks(this.options.ticks.x);
+        }
+        if (typeof this.options.ticks.y === 'function') {
+            yAxis = d3.axisLeft(yScale).ticks(this.options.ticks.y(this.data));
+        }
+        else {
+            yAxis = d3.axisLeft(yScale).ticks(this.options.ticks.y);
+        }
         this.chart
             .append('g')
             .attr('class', 'x axis')
@@ -101,10 +132,24 @@ var Chart = /** @class */ (function () {
             this.chart
                 .append('path')
                 .attr('d', lineFunctions[i](this.data[i]))
-                .attr('stroke', this.options.strokes[0])
+                .attr('stroke', this.options.strokes[i])
                 .attr('stroke-width', 2)
                 .attr('fill', 'none');
         }
+    };
+    Chart.prototype.rotateRows = function () {
+        var columns = [];
+        for (var i = 0; i < this.data[0].length; i++) {
+            columns.push(new Array());
+        }
+        for (var _i = 0, _a = this.data; _i < _a.length; _i++) {
+            var row = _a[_i];
+            for (var i = 0; i < row.length; i++) {
+                var val = row[i];
+                columns[i].push(val);
+            }
+        }
+        this.data = columns;
     };
     return Chart;
 }());

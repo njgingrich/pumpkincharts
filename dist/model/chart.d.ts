@@ -6,5 +6,7 @@ export declare class Chart {
     chart: any;
     dataType: DataType;
     constructor(opts: ClassOptions);
-    draw(): void;
+    private draw(chartType);
+    private lineChart();
+    private rotateRows();
 }

@@ -1,6 +1,7 @@
 import * as d3 from 'd3'
 import { Axis, BaseType, ScaleLinear } from 'd3'
-import { DataType, DataOptions, DataPoint } from '../interface/data'
+
+import { ChartType, DataType, DataOptions, DataPoint } from '../interface/data'
 import { Options, ClassOptions } from '../interface/options'
 import {
   xScalePoints,
@@ -15,13 +16,31 @@ const defaultOptions = {
   width: 900,
   height: 500,
   parent: document.getElementsByTagName('svg')[0] as SVGElement,
+  chartType: ChartType.LINE,
   padding: {
     top: 20,
     bottom: 20,
     left: 20,
     right: 20,
   },
-  strokes: ['blue'],
+  strokes: [
+    'blue',
+    'red',
+    'green',
+    'yellow',
+    'black',
+    'brown',
+    'purple',
+    'orange',
+  ],
+  ticks: {
+    x: (d: any[]) => d[0].length,
+    y: (d: any[]) => d[0].length,
+  },
+  tickFormats: {
+    x: null,
+    y: null,
+  },
 }
 
 export class Chart {
@@ -31,7 +50,7 @@ export class Chart {
   dataType: DataType
 
   constructor(opts: ClassOptions) {
-    this.options = defaultOptions
+    this.options = Object.assign({}, defaultOptions, opts.options)
     this.data = []
     this.chart = {}
 
@@ -47,25 +66,24 @@ export class Chart {
     } else {
       throw new Error('No valid data type found')
     }
+    this.draw(this.options.chartType)
+  }
 
-    if (opts.options.height) this.options.height = opts.options.height
-    if (opts.options.parent) this.options.parent = opts.options.parent
-    if (opts.options.strokes) this.options.strokes = opts.options.strokes
-    if (opts.options.width) this.options.width = opts.options.width
-    if (opts.options.padding) {
-      if (opts.options.padding.top)
-        this.options.padding.top = opts.options.padding.top
-      if (opts.options.padding.bottom)
-        this.options.padding.bottom = opts.options.padding.bottom
-      if (opts.options.padding.left)
-        this.options.padding.left = opts.options.padding.left
-      if (opts.options.padding.right)
-        this.options.padding.right = opts.options.padding.right
+  private draw(chartType: ChartType) {
+    this.chart = d3.select<SVGElement, {}>(this.options.parent)
+    this.chart
+      .attr('width', this.options.width)
+      .attr('height', this.options.height)
+
+    switch (chartType) {
+      case ChartType.LINE: {
+        this.lineChart()
+        break
+      }
     }
   }
 
-  draw() {
-    this.chart = d3.select<SVGElement, {}>(this.options.parent)
+  private lineChart() {
     const WIDTH = this.options.width
     const HEIGHT = this.options.height
     const MARGIN = {
@@ -91,13 +109,31 @@ export class Chart {
         lineFunctions = linesFromColumns(this.data, xScale, yScale)
         break
       }
+      case DataType.ROWS: {
+        this.rotateRows()
+
+        xScale = xScaleColumns(this.data, [MARGIN.LEFT, WIDTH - MARGIN.RIGHT])
+        yScale = yScaleColumns(this.data, [HEIGHT - MARGIN.TOP, MARGIN.BOTTOM])
+        lineFunctions = linesFromColumns(this.data, xScale, yScale)
+        break
+      }
       default: {
         throw new Error('No valid data type found')
       }
     }
 
-    const xAxis: any = d3.axisBottom(xScale)
-    const yAxis: any = d3.axisLeft(yScale)
+    let xAxis: any
+    let yAxis: any
+    if (typeof this.options.ticks.x === 'function') {
+      xAxis = d3.axisBottom(xScale).ticks(this.options.ticks.x(this.data))
+    } else {
+      xAxis = d3.axisBottom(xScale).ticks(this.options.ticks.x)
+    }
+    if (typeof this.options.ticks.y === 'function') {
+      yAxis = d3.axisLeft(yScale).ticks(this.options.ticks.y(this.data))
+    } else {
+      yAxis = d3.axisLeft(yScale).ticks(this.options.ticks.y)
+    }
 
     this.chart
       .append('g')
@@ -114,9 +150,23 @@ export class Chart {
       this.chart
         .append('path')
         .attr('d', <any>lineFunctions[i](this.data[i]))
-        .attr('stroke', this.options.strokes[0])
+        .attr('stroke', this.options.strokes[i])
         .attr('stroke-width', 2)
         .attr('fill', 'none')
     }
+  }
+
+  private rotateRows() {
+    let columns = []
+    for (let i = 0; i < this.data[0].length; i++) {
+      columns.push(new Array())
+    }
+    for (let row of this.data) {
+      for (let i = 0; i < row.length; i++) {
+        let val: number = row[i]
+        columns[i].push(val)
+      }
+    }
+    this.data = columns
   }
 }

@@ -27,7 +27,7 @@ exports.xScaleColumns = xScaleColumns;
 function yScalePoints(data, range) {
     var min = data
         .map(function (a) { return Math.min.apply(Math, a.map(function (e) { return e.y; })); })
-        .reduce(function (max, cur) { return Math.min(max, cur); }, 0);
+        .reduce(function (min, cur) { return Math.min(min, cur); }, 0);
     var max = data
         .map(function (a) { return Math.max.apply(Math, a.map(function (e) { return e.y; })); })
         .reduce(function (max, cur) { return Math.max(max, cur); }, 0);
@@ -40,7 +40,7 @@ exports.yScalePoints = yScalePoints;
 function yScaleColumns(data, range) {
     var min = data
         .map(function (a) { return Math.min.apply(Math, a); })
-        .reduce(function (max, cur) { return Math.min(max, cur); }, 0);
+        .reduce(function (min, cur) { return Math.min(min, cur); }, 0);
     var max = data
         .map(function (a) { return Math.max.apply(Math, a); })
         .reduce(function (max, cur) { return Math.max(max, cur); }, 0);

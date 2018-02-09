@@ -1,8 +1,16 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+var ChartType;
+(function (ChartType) {
+    ChartType["BAR"] = "bar";
+    ChartType["DONUT"] = "donut";
+    ChartType["LINE"] = "line";
+    ChartType["PIE"] = "pie";
+    ChartType["STACKED"] = "stacked";
+})(ChartType = exports.ChartType || (exports.ChartType = {}));
 var DataType;
 (function (DataType) {
-    DataType[DataType["POINTS"] = 0] = "POINTS";
-    DataType[DataType["COLUMNS"] = 1] = "COLUMNS";
-    DataType[DataType["ROWS"] = 2] = "ROWS";
+    DataType["POINTS"] = "points";
+    DataType["COLUMNS"] = "columns";
+    DataType["ROWS"] = "rows";
 })(DataType = exports.DataType || (exports.DataType = {}));

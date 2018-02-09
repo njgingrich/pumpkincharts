@@ -1,12 +1,20 @@
+export enum ChartType {
+  BAR = 'bar',
+  DONUT = 'donut',
+  LINE = 'line',
+  PIE = 'pie',
+  STACKED = 'stacked',
+}
+
 export interface DataPoint {
   x: number
   y: number
 }
 
 export enum DataType {
-  POINTS,
-  COLUMNS,
-  ROWS,
+  POINTS = 'points',
+  COLUMNS = 'columns',
+  ROWS = 'rows',
 }
 
 export interface DataOptions {

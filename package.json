@@ -11,7 +11,10 @@
     "type": "git",
     "url": "git+https://github.com/njgingrich/dcharts.git"
   },
-  "keywords": ["d3", "chart"],
+  "keywords": [
+    "d3",
+    "chart"
+  ],
   "author": "Nathan Gingrich",
   "license": "MIT",
   "bugs": {
@@ -20,6 +23,7 @@
   "homepage": "https://github.com/njgingrich/dcharts#readme",
   "devDependencies": {
     "@types/d3": "^4.12.0",
+    "@types/shuffle-array": "^0.0.28",
     "eslint-config-prettier": "^2.9.0",
     "prettier": "1.10.2",
     "typescript": "^2.7.1"
