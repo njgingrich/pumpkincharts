@@ -1,8 +1,8 @@
 import * as d3 from 'd3'
 import { ScaleLinear } from 'd3'
-import { DataPoint } from '../interface/data'
+import { DataPoint, DataType } from '../interface/data'
 
-export function xScalePoints(data: DataPoint[][], range: number[]) {
+function xScalePoints(data: DataPoint[][], range: number[]) {
   const min = data
     .map(a => Math.min(...a.map(e => e.x)))
     .reduce((max, cur) => Math.min(max, cur), 0)
@@ -16,7 +16,7 @@ export function xScalePoints(data: DataPoint[][], range: number[]) {
     .domain([min, max])
 }
 
-export function xScaleColumns(data: number[][], range: number[]) {
+function xScaleColumns(data: number[][], range: number[]) {
   const longest = data
     .map(a => a.length)
     .reduce((max, cur) => Math.max(max, cur), 0)
@@ -27,7 +27,7 @@ export function xScaleColumns(data: number[][], range: number[]) {
     .domain([0, longest - 1])
 }
 
-export function yScalePoints(data: DataPoint[][], range: number[]) {
+function yScalePoints(data: DataPoint[][], range: number[]) {
   const min = data
     .map(a => Math.min(...a.map(e => e.y)))
     .reduce((min, cur) => Math.min(min, cur), 0)
@@ -41,7 +41,7 @@ export function yScalePoints(data: DataPoint[][], range: number[]) {
     .domain([min, max])
 }
 
-export function yScaleColumns(data: number[][], range: number[]) {
+function yScaleColumns(data: number[][], range: number[]) {
   const min = data
     .map(a => Math.min(...a))
     .reduce((min, cur) => Math.min(min, cur), 0)
@@ -53,4 +53,35 @@ export function yScaleColumns(data: number[][], range: number[]) {
     .scaleLinear<number>()
     .range(range)
     .domain([min, max])
+}
+
+export function getScales(
+  dataType: DataType,
+  data: number[][] | DataPoint[][],
+  xRange: number[],
+  yRange: number[],
+) {
+  switch (dataType) {
+    case DataType.POINTS: {
+      return {
+        xScale: xScalePoints(data as DataPoint[][], xRange),
+        yScale: yScalePoints(data as DataPoint[][], yRange),
+      }
+    }
+    case DataType.COLUMNS: {
+      return {
+        xScale: xScaleColumns(data as number[][], xRange),
+        yScale: yScaleColumns(data as number[][], yRange),
+      }
+    }
+    case DataType.ROWS: {
+      return {
+        xScale: xScaleColumns(data as number[][], xRange),
+        yScale: yScaleColumns(data as number[][], yRange),
+      }
+    }
+    default: {
+      throw new Error('No valid data type found')
+    }
+  }
 }

@@ -3,14 +3,9 @@ import { Axis, BaseType, ScaleLinear } from 'd3'
 
 import { ChartType, DataType, DataOptions, DataPoint } from '../interface/data'
 import { Options, ClassOptions } from '../interface/options'
-import {
-  xScalePoints,
-  xScaleColumns,
-  yScalePoints,
-  yScaleColumns,
-} from './scale'
+import { getScales } from './scale'
 
-import { linesFromPoints, linesFromColumns } from './line'
+import { getLineFunctions } from './line'
 
 const defaultOptions = {
   width: 900,
@@ -59,6 +54,7 @@ export class Chart {
       this.dataType = DataType.COLUMNS
     } else if (opts.data.rows) {
       this.data = opts.data.rows
+      this.data = this.rotateRows(opts.data.rows)
       this.dataType = DataType.ROWS
     } else if (opts.data.points) {
       this.data = opts.data.points
@@ -84,43 +80,26 @@ export class Chart {
   }
 
   private lineChart() {
-    const WIDTH = this.options.width
-    const HEIGHT = this.options.height
-    const MARGIN = {
-      TOP: this.options.padding.top,
-      RIGHT: this.options.padding.right,
-      BOTTOM: this.options.padding.bottom,
-      LEFT: this.options.padding.left,
-    }
-
-    let xScale: ScaleLinear<number, number>
-    let yScale: ScaleLinear<number, number>
-    let lineFunctions: any[]
-    switch (this.dataType) {
-      case DataType.POINTS: {
-        xScale = xScalePoints(this.data, [MARGIN.LEFT, WIDTH - MARGIN.RIGHT])
-        yScale = yScalePoints(this.data, [HEIGHT - MARGIN.TOP, MARGIN.BOTTOM])
-        lineFunctions = linesFromPoints(this.data, xScale, yScale)
-        break
-      }
-      case DataType.COLUMNS: {
-        xScale = xScaleColumns(this.data, [MARGIN.LEFT, WIDTH - MARGIN.RIGHT])
-        yScale = yScaleColumns(this.data, [HEIGHT - MARGIN.TOP, MARGIN.BOTTOM])
-        lineFunctions = linesFromColumns(this.data, xScale, yScale)
-        break
-      }
-      case DataType.ROWS: {
-        this.rotateRows()
-
-        xScale = xScaleColumns(this.data, [MARGIN.LEFT, WIDTH - MARGIN.RIGHT])
-        yScale = yScaleColumns(this.data, [HEIGHT - MARGIN.TOP, MARGIN.BOTTOM])
-        lineFunctions = linesFromColumns(this.data, xScale, yScale)
-        break
-      }
-      default: {
-        throw new Error('No valid data type found')
-      }
-    }
+    const xRange = [
+      this.options.padding.left,
+      this.options.width - this.options.padding.right,
+    ]
+    const yRange = [
+      this.options.height - this.options.padding.top,
+      this.options.padding.bottom,
+    ]
+    const { xScale, yScale } = getScales(
+      this.dataType,
+      this.data,
+      xRange,
+      yRange,
+    )
+    const lineFunctions = getLineFunctions(
+      this.dataType,
+      this.data,
+      xScale,
+      yScale,
+    )
 
     let xAxis: any
     let yAxis: any
@@ -138,35 +117,38 @@ export class Chart {
     this.chart
       .append('g')
       .attr('class', 'x axis')
-      .attr('transform', `translate(0, ${HEIGHT - MARGIN.BOTTOM})`)
+      .attr(
+        'transform',
+        `translate(0, ${this.options.height - this.options.padding.bottom})`,
+      )
       .call(xAxis)
     this.chart
       .append('g')
       .attr('class', 'y axis')
-      .attr('transform', `translate(${MARGIN.LEFT}, 0)`)
+      .attr('transform', `translate(${this.options.padding.left}, 0)`)
       .call(yAxis)
 
     for (let i = 0; i < lineFunctions.length; i++) {
       this.chart
         .append('path')
-        .attr('d', <any>lineFunctions[i](this.data[i]))
+        .attr('d', lineFunctions[i](this.data[i]))
         .attr('stroke', this.options.strokes[i])
         .attr('stroke-width', 2)
         .attr('fill', 'none')
     }
   }
 
-  private rotateRows() {
+  private rotateRows(data: number[][]) {
     let columns = []
-    for (let i = 0; i < this.data[0].length; i++) {
+    for (let i = 0; i < data[0].length; i++) {
       columns.push(new Array())
     }
-    for (let row of this.data) {
+    for (let row of data) {
       for (let i = 0; i < row.length; i++) {
         let val: number = row[i]
         columns[i].push(val)
       }
     }
-    this.data = columns
+    return columns
   }
 }

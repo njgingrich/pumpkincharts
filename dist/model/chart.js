@@ -45,6 +45,7 @@ var Chart = /** @class */ (function () {
         }
         else if (opts.data.rows) {
             this.data = opts.data.rows;
+            this.data = this.rotateRows(opts.data.rows);
             this.dataType = data_1.DataType.ROWS;
         }
         else if (opts.data.points) {
@@ -69,41 +70,16 @@ var Chart = /** @class */ (function () {
         }
     };
     Chart.prototype.lineChart = function () {
-        var WIDTH = this.options.width;
-        var HEIGHT = this.options.height;
-        var MARGIN = {
-            TOP: this.options.padding.top,
-            RIGHT: this.options.padding.right,
-            BOTTOM: this.options.padding.bottom,
-            LEFT: this.options.padding.left,
-        };
-        var xScale;
-        var yScale;
-        var lineFunctions;
-        switch (this.dataType) {
-            case data_1.DataType.POINTS: {
-                xScale = scale_1.xScalePoints(this.data, [MARGIN.LEFT, WIDTH - MARGIN.RIGHT]);
-                yScale = scale_1.yScalePoints(this.data, [HEIGHT - MARGIN.TOP, MARGIN.BOTTOM]);
-                lineFunctions = line_1.linesFromPoints(this.data, xScale, yScale);
-                break;
-            }
-            case data_1.DataType.COLUMNS: {
-                xScale = scale_1.xScaleColumns(this.data, [MARGIN.LEFT, WIDTH - MARGIN.RIGHT]);
-                yScale = scale_1.yScaleColumns(this.data, [HEIGHT - MARGIN.TOP, MARGIN.BOTTOM]);
-                lineFunctions = line_1.linesFromColumns(this.data, xScale, yScale);
-                break;
-            }
-            case data_1.DataType.ROWS: {
-                this.rotateRows();
-                xScale = scale_1.xScaleColumns(this.data, [MARGIN.LEFT, WIDTH - MARGIN.RIGHT]);
-                yScale = scale_1.yScaleColumns(this.data, [HEIGHT - MARGIN.TOP, MARGIN.BOTTOM]);
-                lineFunctions = line_1.linesFromColumns(this.data, xScale, yScale);
-                break;
-            }
-            default: {
-                throw new Error('No valid data type found');
-            }
-        }
+        var xRange = [
+            this.options.padding.left,
+            this.options.width - this.options.padding.right,
+        ];
+        var yRange = [
+            this.options.height - this.options.padding.top,
+            this.options.padding.bottom,
+        ];
+        var _a = scale_1.getScales(this.dataType, this.data, xRange, yRange), xScale = _a.xScale, yScale = _a.yScale;
+        var lineFunctions = line_1.getLineFunctions(this.dataType, this.data, xScale, yScale);
         var xAxis;
         var yAxis;
         if (typeof this.options.ticks.x === 'function') {
@@ -121,12 +97,12 @@ var Chart = /** @class */ (function () {
         this.chart
             .append('g')
             .attr('class', 'x axis')
-            .attr('transform', "translate(0, " + (HEIGHT - MARGIN.BOTTOM) + ")")
+            .attr('transform', "translate(0, " + (this.options.height - this.options.padding.bottom) + ")")
             .call(xAxis);
         this.chart
             .append('g')
             .attr('class', 'y axis')
-            .attr('transform', "translate(" + MARGIN.LEFT + ", 0)")
+            .attr('transform', "translate(" + this.options.padding.left + ", 0)")
             .call(yAxis);
         for (var i = 0; i < lineFunctions.length; i++) {
             this.chart
@@ -137,19 +113,19 @@ var Chart = /** @class */ (function () {
                 .attr('fill', 'none');
         }
     };
-    Chart.prototype.rotateRows = function () {
+    Chart.prototype.rotateRows = function (data) {
         var columns = [];
-        for (var i = 0; i < this.data[0].length; i++) {
+        for (var i = 0; i < data[0].length; i++) {
             columns.push(new Array());
         }
-        for (var _i = 0, _a = this.data; _i < _a.length; _i++) {
-            var row = _a[_i];
+        for (var _i = 0, data_2 = data; _i < data_2.length; _i++) {
+            var row = data_2[_i];
             for (var i = 0; i < row.length; i++) {
                 var val = row[i];
                 columns[i].push(val);
             }
         }
-        this.data = columns;
+        return columns;
     };
     return Chart;
 }());

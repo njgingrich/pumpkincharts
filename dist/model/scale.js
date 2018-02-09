@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var d3 = require("d3");
+var data_1 = require("../interface/data");
 function xScalePoints(data, range) {
     var min = data
         .map(function (a) { return Math.min.apply(Math, a.map(function (e) { return e.x; })); })
@@ -13,7 +14,6 @@ function xScalePoints(data, range) {
         .range(range)
         .domain([min, max]);
 }
-exports.xScalePoints = xScalePoints;
 function xScaleColumns(data, range) {
     var longest = data
         .map(function (a) { return a.length; })
@@ -23,7 +23,6 @@ function xScaleColumns(data, range) {
         .range(range)
         .domain([0, longest - 1]);
 }
-exports.xScaleColumns = xScaleColumns;
 function yScalePoints(data, range) {
     var min = data
         .map(function (a) { return Math.min.apply(Math, a.map(function (e) { return e.y; })); })
@@ -36,7 +35,6 @@ function yScalePoints(data, range) {
         .range(range)
         .domain([min, max]);
 }
-exports.yScalePoints = yScalePoints;
 function yScaleColumns(data, range) {
     var min = data
         .map(function (a) { return Math.min.apply(Math, a); })
@@ -49,4 +47,29 @@ function yScaleColumns(data, range) {
         .range(range)
         .domain([min, max]);
 }
-exports.yScaleColumns = yScaleColumns;
+function getScales(dataType, data, xRange, yRange) {
+    switch (dataType) {
+        case data_1.DataType.POINTS: {
+            return {
+                xScale: xScalePoints(data, xRange),
+                yScale: yScalePoints(data, yRange),
+            };
+        }
+        case data_1.DataType.COLUMNS: {
+            return {
+                xScale: xScaleColumns(data, xRange),
+                yScale: yScaleColumns(data, yRange),
+            };
+        }
+        case data_1.DataType.ROWS: {
+            return {
+                xScale: xScaleColumns(data, xRange),
+                yScale: yScaleColumns(data, yRange),
+            };
+        }
+        default: {
+            throw new Error('No valid data type found');
+        }
+    }
+}
+exports.getScales = getScales;

@@ -8,5 +8,5 @@ export declare class Chart {
     constructor(opts: ClassOptions);
     private draw(chartType);
     private lineChart();
-    private rotateRows();
+    private rotateRows(data);
 }

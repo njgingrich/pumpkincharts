@@ -1,8 +1,8 @@
 import * as d3 from 'd3'
 import { Line, ScaleLinear } from 'd3'
-import { DataPoint } from '../interface/data'
+import { DataPoint, DataType } from '../interface/data'
 
-export function linesFromPoints(
+function linesFromPoints(
   data: DataPoint[][],
   xScale: ScaleLinear<number, number>,
   yScale: ScaleLinear<number, number>,
@@ -19,7 +19,7 @@ export function linesFromPoints(
   return funcs
 }
 
-export function linesFromColumns(
+function linesFromColumns(
   data: number[][],
   xScale: ScaleLinear<number, number>,
   yScale: ScaleLinear<number, number>,
@@ -34,4 +34,23 @@ export function linesFromColumns(
     )
   }
   return funcs
+}
+
+export function getLineFunctions(
+  dataType: DataType,
+  data: number[][] | DataPoint[][],
+  xScale: ScaleLinear<number, number>,
+  yScale: ScaleLinear<number, number>,
+): Line<any>[] {
+  switch (dataType) {
+    case DataType.POINTS: {
+      return linesFromPoints(data as DataPoint[][], xScale, yScale)
+    }
+    case DataType.COLUMNS: {
+      return linesFromColumns(data as number[][], xScale, yScale)
+    }
+    case DataType.ROWS: {
+      return linesFromColumns(data as number[][], xScale, yScale)
+    }
+  }
 }
