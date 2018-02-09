@@ -13,4 +13,5 @@ var DataType;
     DataType["POINTS"] = "points";
     DataType["COLUMNS"] = "columns";
     DataType["ROWS"] = "rows";
+    DataType["VALUES"] = "values";
 })(DataType = exports.DataType || (exports.DataType = {}));

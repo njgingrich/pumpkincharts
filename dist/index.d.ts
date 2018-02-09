@@ -1,1 +1,1 @@
-export { Chart } from './model/chart';
+export { Chart } from './chart';

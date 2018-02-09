@@ -1,11 +1,11 @@
 import * as d3 from 'd3'
 import { Axis, BaseType, ScaleLinear } from 'd3'
 
-import { ChartType, DataType, DataOptions, DataPoint } from '../interface/data'
-import { Options, ClassOptions } from '../interface/options'
-import { getScales } from './scale'
+import { ChartType, DataType, DataOptions, DataPoint } from './interface/data'
+import { Options, ClassOptions } from './interface/options'
+import { getScales } from './model/scale'
 
-import { getLineFunctions } from './line'
+import { getLineFunctions } from './charts/line'
 
 const defaultOptions = {
   width: 900,
@@ -40,7 +40,7 @@ const defaultOptions = {
 
 export class Chart {
   options: Options
-  data: any[][]
+  data: any[]
   chart: any
   dataType: DataType
 
@@ -59,6 +59,9 @@ export class Chart {
     } else if (opts.data.points) {
       this.data = opts.data.points
       this.dataType = DataType.POINTS
+    } else if (opts.data.values) {
+      this.data = opts.data.values
+      this.dataType = DataType.VALUES
     } else {
       throw new Error('No valid data type found')
     }
@@ -76,7 +79,37 @@ export class Chart {
         this.lineChart()
         break
       }
+      case ChartType.PIE: {
+        this.pieChart()
+        break
+      }
     }
+  }
+
+  private pieChart() {
+    const color = d3.scaleOrdinal().range(this.options.strokes)
+    this.chart
+      .append('g')
+      .attr(
+        'transform',
+        `translate(${this.options.width / 2}, ${this.options.height / 2})`,
+      )
+    const arc = d3
+      .arc()
+      .innerRadius(0)
+      .outerRadius(Math.min(this.options.width, this.options.height) / 2)
+    const pie = d3
+      .pie()
+      .value((d: any) => d)
+      .sort(null)
+    const path = this.chart
+      .select('g')
+      .selectAll('path')
+      .data(pie(this.data))
+      .enter()
+      .append('path')
+      .attr('d', arc)
+      .attr('fill', (d: any, i: any) => color(d.data))
   }
 
   private lineChart() {

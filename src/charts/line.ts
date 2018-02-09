@@ -52,5 +52,8 @@ export function getLineFunctions(
     case DataType.ROWS: {
       return linesFromColumns(data as number[][], xScale, yScale)
     }
+    default: {
+      throw new Error('Not a valid data type for line chart')
+    }
   }
 }
