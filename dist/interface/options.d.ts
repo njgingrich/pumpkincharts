@@ -19,6 +19,8 @@ export interface Options {
         x: string | Function | null;
         y: string | Function | null;
     };
+    radius: number | Function;
+    donut: number | Function;
 }
 export interface ClassOptions {
     data: DataOptions;

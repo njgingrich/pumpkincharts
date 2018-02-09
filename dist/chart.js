@@ -4,6 +4,8 @@ var d3 = require("d3");
 var data_1 = require("./interface/data");
 var scale_1 = require("./model/scale");
 var line_1 = require("./charts/line");
+var donut_1 = require("./charts/donut");
+var pie_1 = require("./charts/pie");
 var defaultOptions = {
     width: 900,
     height: 500,
@@ -33,6 +35,8 @@ var defaultOptions = {
         x: null,
         y: null,
     },
+    radius: function (width, height) { return Math.min(width, height) / 2; },
+    donut: function (radius) { return radius / 2; },
 };
 var Chart = /** @class */ (function () {
     function Chart(opts) {
@@ -75,17 +79,35 @@ var Chart = /** @class */ (function () {
                 this.pieChart();
                 break;
             }
+            case data_1.ChartType.DONUT: {
+                this.donutChart();
+                break;
+            }
         }
     };
-    Chart.prototype.pieChart = function () {
+    Chart.prototype.donutChart = function () {
         var color = d3.scaleOrdinal().range(this.options.strokes);
         this.chart
             .append('g')
             .attr('transform', "translate(" + this.options.width / 2 + ", " + this.options.height / 2 + ")");
-        var arc = d3
-            .arc()
-            .innerRadius(0)
-            .outerRadius(Math.min(this.options.width, this.options.height) / 2);
+        var arc = donut_1.getDonut(this.options.radius, this.options.donut, this.options.width, this.options.height);
+        var donut = d3
+            .pie()
+            .value(function (d) { return d; })
+            .sort(null);
+        var path = this.chart
+            .select('g')
+            .selectAll('path')
+            .data(donut(this.data))
+            .enter()
+            .append('path')
+            .attr('d', arc)
+            .attr('fill', function (d, i) { return color(d.data); });
+    };
+    Chart.prototype.pieChart = function () {
+        var color = d3.scaleOrdinal().range(this.options.strokes);
+        this.chart.append('g').attr('transform', "translate(\n          " + this.options.width / 2 + ",\n          " + this.options.height / 2 + ")");
+        var arc = pie_1.getArc(this.options.radius, this.options.width, this.options.height);
         var pie = d3
             .pie()
             .value(function (d) { return d; })

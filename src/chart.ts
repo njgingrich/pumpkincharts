@@ -6,6 +6,8 @@ import { Options, ClassOptions } from './interface/options'
 import { getScales } from './model/scale'
 
 import { getLineFunctions } from './charts/line'
+import { getDonut } from './charts/donut'
+import { getArc } from './charts/pie'
 
 const defaultOptions = {
   width: 900,
@@ -36,6 +38,8 @@ const defaultOptions = {
     x: null,
     y: null,
   },
+  radius: (width: number, height: number) => Math.min(width, height) / 2,
+  donut: (radius: number) => radius / 2,
 }
 
 export class Chart {
@@ -83,10 +87,14 @@ export class Chart {
         this.pieChart()
         break
       }
+      case ChartType.DONUT: {
+        this.donutChart()
+        break
+      }
     }
   }
 
-  private pieChart() {
+  private donutChart() {
     const color = d3.scaleOrdinal().range(this.options.strokes)
     this.chart
       .append('g')
@@ -94,10 +102,41 @@ export class Chart {
         'transform',
         `translate(${this.options.width / 2}, ${this.options.height / 2})`,
       )
-    const arc = d3
-      .arc()
-      .innerRadius(0)
-      .outerRadius(Math.min(this.options.width, this.options.height) / 2)
+
+    const arc = getDonut(
+      this.options.radius,
+      this.options.donut,
+      this.options.width,
+      this.options.height,
+    )
+    const donut = d3
+      .pie()
+      .value((d: any) => d)
+      .sort(null)
+    const path = this.chart
+      .select('g')
+      .selectAll('path')
+      .data(donut(this.data))
+      .enter()
+      .append('path')
+      .attr('d', arc)
+      .attr('fill', (d: any, i: any) => color(d.data))
+  }
+
+  private pieChart() {
+    const color = d3.scaleOrdinal().range(this.options.strokes)
+    this.chart.append('g').attr(
+      'transform',
+      `translate(
+          ${this.options.width / 2},
+          ${this.options.height / 2})`,
+    )
+
+    const arc = getArc(
+      this.options.radius,
+      this.options.width,
+      this.options.height,
+    )
     const pie = d3
       .pie()
       .value((d: any) => d)

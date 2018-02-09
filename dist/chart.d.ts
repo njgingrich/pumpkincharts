@@ -7,6 +7,7 @@ export declare class Chart {
     dataType: DataType;
     constructor(opts: ClassOptions);
     private draw(chartType);
+    private donutChart();
     private pieChart();
     private lineChart();
     private rotateRows(data);
