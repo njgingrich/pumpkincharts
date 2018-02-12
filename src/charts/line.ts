@@ -1,5 +1,5 @@
-import * as d3 from 'd3'
-import { Line, ScaleLinear } from 'd3'
+import { ScaleLinear } from 'd3-scale'
+import { line, Line } from 'd3-shape'
 import { DataPoint, DataType } from '../interface/data'
 
 function linesFromPoints(
@@ -10,8 +10,7 @@ function linesFromPoints(
   let funcs = []
   for (let col of data) {
     funcs.push(
-      d3
-        .line<DataPoint>()
+      line<DataPoint>()
         .x(d => xScale(d.x))
         .y(d => yScale(d.y)),
     )
@@ -27,8 +26,7 @@ function linesFromColumns(
   let funcs = []
   for (let col of data) {
     funcs.push(
-      d3
-        .line<number>()
+      line<number>()
         .x(d => xScale(col.indexOf(d)))
         .y(d => yScale(d)),
     )

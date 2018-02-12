@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var d3 = require("d3");
+var d3_scale_1 = require("d3-scale");
 var data_1 = require("../interface/data");
 function xScalePoints(data, range) {
     var min = data
@@ -9,8 +9,7 @@ function xScalePoints(data, range) {
     var max = data
         .map(function (a) { return Math.max.apply(Math, a.map(function (e) { return e.x; })); })
         .reduce(function (max, cur) { return Math.max(max, cur); }, 0);
-    return d3
-        .scaleLinear()
+    return d3_scale_1.scaleLinear()
         .range(range)
         .domain([min, max]);
 }
@@ -18,8 +17,7 @@ function xScaleColumns(data, range) {
     var longest = data
         .map(function (a) { return a.length; })
         .reduce(function (max, cur) { return Math.max(max, cur); }, 0);
-    return d3
-        .scaleLinear()
+    return d3_scale_1.scaleLinear()
         .range(range)
         .domain([0, longest - 1]);
 }
@@ -30,8 +28,7 @@ function yScalePoints(data, range) {
     var max = data
         .map(function (a) { return Math.max.apply(Math, a.map(function (e) { return e.y; })); })
         .reduce(function (max, cur) { return Math.max(max, cur); }, 0);
-    return d3
-        .scaleLinear()
+    return d3_scale_1.scaleLinear()
         .range(range)
         .domain([min, max]);
 }
@@ -42,8 +39,7 @@ function yScaleColumns(data, range) {
     var max = data
         .map(function (a) { return Math.max.apply(Math, a); })
         .reduce(function (max, cur) { return Math.max(max, cur); }, 0);
-    return d3
-        .scaleLinear()
+    return d3_scale_1.scaleLinear()
         .range(range)
         .domain([min, max]);
 }

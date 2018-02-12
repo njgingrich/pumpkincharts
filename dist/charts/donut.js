@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var d3 = require("d3");
+var d3_shape_1 = require("d3-shape");
 function getDonut(radius, donut, width, height) {
     var radiusSize;
     if (typeof radius === 'function') {
@@ -16,8 +16,7 @@ function getDonut(radius, donut, width, height) {
     else {
         donutSize = donut;
     }
-    return d3
-        .arc()
+    return d3_shape_1.arc()
         .innerRadius(donutSize)
         .outerRadius(radiusSize);
 }

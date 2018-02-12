@@ -1,5 +1,4 @@
-import * as d3 from 'd3'
-import { Arc, DefaultArcObject } from 'd3'
+import { arc, Arc, DefaultArcObject } from 'd3-shape'
 
 export function getArc(
   radius: number | Function,
@@ -7,13 +6,11 @@ export function getArc(
   height: number,
 ) {
   if (typeof radius === 'function') {
-    return d3
-      .arc()
+    return arc()
       .innerRadius(0)
       .outerRadius(radius(width, height))
   } else {
-    return d3
-      .arc()
+    return arc()
       .innerRadius(0)
       .outerRadius(radius)
   }

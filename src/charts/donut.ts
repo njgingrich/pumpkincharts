@@ -1,5 +1,4 @@
-import * as d3 from 'd3'
-import { Arc, DefaultArcObject } from 'd3'
+import { arc, Arc, DefaultArcObject } from 'd3-shape'
 
 export function getDonut(
   radius: number | Function,
@@ -21,8 +20,7 @@ export function getDonut(
     donutSize = donut
   }
 
-  return d3
-    .arc()
+  return arc()
     .innerRadius(donutSize)
     .outerRadius(radiusSize)
 }

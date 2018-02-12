@@ -1,6 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var d3 = require("d3");
+var d3_array_1 = require("d3-array");
+var d3_selection_1 = require("d3-selection");
+var d3_scale_1 = require("d3-scale");
+var d3_shape_1 = require("d3-shape");
+var d3_axis_1 = require("d3-axis");
 var data_1 = require("./interface/data");
 var scale_1 = require("./model/scale");
 var line_1 = require("./charts/line");
@@ -69,8 +73,24 @@ var Chart = /** @class */ (function () {
         }
         this.draw(this.options.chartType);
     }
+    Chart.prototype.chartDimensions = function () {
+        return {
+            width: this.chartWidth(),
+            height: this.chartHeight(),
+        };
+    };
+    Chart.prototype.chartWidth = function () {
+        return (this.options.width -
+            this.options.padding.left -
+            this.options.padding.right);
+    };
+    Chart.prototype.chartHeight = function () {
+        return (this.options.height -
+            this.options.padding.top -
+            this.options.padding.bottom);
+    };
     Chart.prototype.draw = function (chartType) {
-        this.chart = d3.select(this.options.parent);
+        this.chart = d3_selection_1.select(this.options.parent);
         this.chart
             .attr('width', this.options.width)
             .attr('height', this.options.height);
@@ -96,34 +116,19 @@ var Chart = /** @class */ (function () {
     Chart.prototype.barChart = function () {
         var _this = this;
         this.chart.append('g').attr('transform', "translate(\n          " + this.options.padding.left + ",\n          " + this.options.padding.top + "\n        )");
-        var x = d3
-            .scaleBand()
-            .range([
-            0,
-            this.options.width -
-                this.options.padding.left -
-                this.options.padding.right,
-        ])
+        var xScale = d3_scale_1.scaleBand()
+            .range([0, this.chartWidth()])
             .padding(0.1);
-        var y = d3
-            .scaleLinear()
-            .range([
-            this.options.height -
-                this.options.padding.top -
-                this.options.padding.bottom,
-            0,
-        ]);
-        var xAxis = d3.axisBottom(x).ticks(this.options.tickFormats.x);
-        var yAxis = d3.axisLeft(y).ticks(this.options.tickFormats.y);
-        x.domain(this.data.map(function (d) { return d.name; }));
-        y.domain([0, d3.max(this.data, function (d) { return d.sales; })]);
+        var yScale = d3_scale_1.scaleLinear().range([this.chartHeight(), 0]);
+        var xAxis = d3_axis_1.axisBottom(xScale).ticks(this.options.tickFormats.x);
+        var yAxis = d3_axis_1.axisLeft(yScale).ticks(this.options.tickFormats.y);
+        xScale.domain(this.data.map(function (d) { return d.name; }));
+        yScale.domain([0, d3_array_1.max(this.data, function (d) { return d.sales; })]);
         this.chart
             .select('g')
             .append('g')
             .attr('class', 'x axis')
-            .attr('transform', "translate(0, " + (this.options.height -
-            this.options.padding.top -
-            this.options.padding.bottom) + ")")
+            .attr('transform', "translate(0, " + this.chartHeight() + ")")
             .call(xAxis);
         this.chart
             .select('g')
@@ -144,24 +149,18 @@ var Chart = /** @class */ (function () {
             .enter()
             .append('rect')
             .attr('class', 'bar')
-            .attr('x', function (d) { return x(d.name); })
-            .attr('width', x.bandwidth())
-            .attr('y', function (d) { return y(d.sales); })
-            .attr('height', function (d) {
-            return _this.options.height -
-                _this.options.padding.top -
-                _this.options.padding.bottom -
-                y(d.sales);
-        });
+            .attr('x', function (d) { return xScale(d.name); })
+            .attr('width', xScale.bandwidth())
+            .attr('y', function (d) { return yScale(d.sales); })
+            .attr('height', function (d) { return _this.chartHeight() - yScale(d.sales); });
     };
     Chart.prototype.donutChart = function () {
-        var color = d3.scaleOrdinal().range(this.options.strokes);
+        var color = d3_scale_1.scaleOrdinal().range(this.options.strokes);
         this.chart
             .append('g')
             .attr('transform', "translate(" + this.options.width / 2 + ", " + this.options.height / 2 + ")");
         var arc = donut_1.getDonut(this.options.radius, this.options.donut, this.options.width, this.options.height);
-        var donut = d3
-            .pie()
+        var donut = d3_shape_1.pie()
             .value(function (d) { return d; })
             .sort(null);
         var path = this.chart
@@ -174,17 +173,16 @@ var Chart = /** @class */ (function () {
             .attr('fill', function (d, i) { return color(d.data); });
     };
     Chart.prototype.pieChart = function () {
-        var color = d3.scaleOrdinal().range(this.options.strokes);
+        var color = d3_scale_1.scaleOrdinal().range(this.options.strokes);
         this.chart.append('g').attr('transform', "translate(\n          " + this.options.width / 2 + ",\n          " + this.options.height / 2 + ")");
         var arc = pie_1.getArc(this.options.radius, this.options.width, this.options.height);
-        var pie = d3
-            .pie()
+        var piechart = d3_shape_1.pie()
             .value(function (d) { return d; })
             .sort(null);
         var path = this.chart
             .select('g')
             .selectAll('path')
-            .data(pie(this.data))
+            .data(piechart(this.data))
             .enter()
             .append('path')
             .attr('d', arc)
@@ -204,16 +202,16 @@ var Chart = /** @class */ (function () {
         var xAxis;
         var yAxis;
         if (typeof this.options.ticks.x === 'function') {
-            xAxis = d3.axisBottom(xScale).ticks(this.options.ticks.x(this.data));
+            xAxis = d3_axis_1.axisBottom(xScale).ticks(this.options.ticks.x(this.data));
         }
         else {
-            xAxis = d3.axisBottom(xScale).ticks(this.options.ticks.x);
+            xAxis = d3_axis_1.axisBottom(xScale).ticks(this.options.ticks.x);
         }
         if (typeof this.options.ticks.y === 'function') {
-            yAxis = d3.axisLeft(yScale).ticks(this.options.ticks.y(this.data));
+            yAxis = d3_axis_1.axisLeft(yScale).ticks(this.options.ticks.y(this.data));
         }
         else {
-            yAxis = d3.axisLeft(yScale).ticks(this.options.ticks.y);
+            yAxis = d3_axis_1.axisLeft(yScale).ticks(this.options.ticks.y);
         }
         this.chart
             .append('g')

@@ -1,5 +1,8 @@
-import * as d3 from 'd3'
-import { Axis, BaseType, ScaleLinear } from 'd3'
+import { max } from 'd3-array'
+import { BaseType, select } from 'd3-selection'
+import { scaleBand, scaleLinear, scaleOrdinal, ScaleLinear } from 'd3-scale'
+import { pie } from 'd3-shape'
+import { axisBottom, axisLeft, Axis } from 'd3-axis'
 
 import { ChartType, DataType, DataOptions, DataPoint } from './interface/data'
 import { Options, ClassOptions } from './interface/options'
@@ -99,7 +102,7 @@ export class Chart {
   }
 
   private draw(chartType: ChartType) {
-    this.chart = d3.select<SVGElement, {}>(this.options.parent)
+    this.chart = select<SVGElement, {}>(this.options.parent)
     this.chart
       .attr('width', this.options.width)
       .attr('height', this.options.height)
@@ -133,16 +136,15 @@ export class Chart {
         )`,
     )
 
-    const xScale = d3
-      .scaleBand()
+    const xScale = scaleBand()
       .range([0, this.chartWidth()])
       .padding(0.1)
-    const yScale = d3.scaleLinear().range([this.chartHeight(), 0])
-    const xAxis = d3.axisBottom(xScale).ticks(this.options.tickFormats.x)
-    const yAxis = d3.axisLeft(yScale).ticks(this.options.tickFormats.y)
+    const yScale = scaleLinear().range([this.chartHeight(), 0])
+    const xAxis = axisBottom(xScale).ticks(this.options.tickFormats.x)
+    const yAxis = axisLeft(yScale).ticks(this.options.tickFormats.y)
 
     xScale.domain(this.data.map(d => d.name))
-    yScale.domain([0, d3.max(this.data, d => d.sales)])
+    yScale.domain([0, max(this.data, d => d.sales)])
 
     this.chart
       .select('g')
@@ -178,7 +180,7 @@ export class Chart {
   }
 
   private donutChart() {
-    const color = d3.scaleOrdinal().range(this.options.strokes)
+    const color = scaleOrdinal().range(this.options.strokes)
     this.chart
       .append('g')
       .attr(
@@ -192,8 +194,7 @@ export class Chart {
       this.options.width,
       this.options.height,
     )
-    const donut = d3
-      .pie()
+    const donut = pie()
       .value((d: any) => d)
       .sort(null)
     const path = this.chart
@@ -207,7 +208,7 @@ export class Chart {
   }
 
   private pieChart() {
-    const color = d3.scaleOrdinal().range(this.options.strokes)
+    const color = scaleOrdinal().range(this.options.strokes)
     this.chart.append('g').attr(
       'transform',
       `translate(
@@ -220,14 +221,13 @@ export class Chart {
       this.options.width,
       this.options.height,
     )
-    const pie = d3
-      .pie()
+    const piechart = pie()
       .value((d: any) => d)
       .sort(null)
     const path = this.chart
       .select('g')
       .selectAll('path')
-      .data(pie(this.data))
+      .data(piechart(this.data))
       .enter()
       .append('path')
       .attr('d', arc)
@@ -259,14 +259,14 @@ export class Chart {
     let xAxis: any
     let yAxis: any
     if (typeof this.options.ticks.x === 'function') {
-      xAxis = d3.axisBottom(xScale).ticks(this.options.ticks.x(this.data))
+      xAxis = axisBottom(xScale).ticks(this.options.ticks.x(this.data))
     } else {
-      xAxis = d3.axisBottom(xScale).ticks(this.options.ticks.x)
+      xAxis = axisBottom(xScale).ticks(this.options.ticks.x)
     }
     if (typeof this.options.ticks.y === 'function') {
-      yAxis = d3.axisLeft(yScale).ticks(this.options.ticks.y(this.data))
+      yAxis = axisLeft(yScale).ticks(this.options.ticks.y(this.data))
     } else {
-      yAxis = d3.axisLeft(yScale).ticks(this.options.ticks.y)
+      yAxis = axisLeft(yScale).ticks(this.options.ticks.y)
     }
 
     this.chart

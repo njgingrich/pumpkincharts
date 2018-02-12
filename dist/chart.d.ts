@@ -6,6 +6,12 @@ export declare class Chart {
     chart: any;
     dataType: DataType;
     constructor(opts: ClassOptions);
+    chartDimensions(): {
+        width: number;
+        height: number;
+    };
+    chartWidth(): number;
+    chartHeight(): number;
     private draw(chartType);
     private barChart();
     private donutChart();

@@ -1,5 +1,4 @@
-import * as d3 from 'd3'
-import { ScaleLinear } from 'd3'
+import { scaleLinear, ScaleLinear } from 'd3-scale'
 import { DataPoint, DataType } from '../interface/data'
 
 function xScalePoints(data: DataPoint[][], range: number[]) {
@@ -10,8 +9,7 @@ function xScalePoints(data: DataPoint[][], range: number[]) {
     .map(a => Math.max(...a.map(e => e.x)))
     .reduce((max, cur) => Math.max(max, cur), 0)
 
-  return d3
-    .scaleLinear<number>()
+  return scaleLinear<number>()
     .range(range)
     .domain([min, max])
 }
@@ -21,8 +19,7 @@ function xScaleColumns(data: number[][], range: number[]) {
     .map(a => a.length)
     .reduce((max, cur) => Math.max(max, cur), 0)
 
-  return d3
-    .scaleLinear<number>()
+  return scaleLinear<number>()
     .range(range)
     .domain([0, longest - 1])
 }
@@ -35,8 +32,7 @@ function yScalePoints(data: DataPoint[][], range: number[]) {
     .map(a => Math.max(...a.map(e => e.y)))
     .reduce((max, cur) => Math.max(max, cur), 0)
 
-  return d3
-    .scaleLinear<number>()
+  return scaleLinear<number>()
     .range(range)
     .domain([min, max])
 }
@@ -49,8 +45,7 @@ function yScaleColumns(data: number[][], range: number[]) {
     .map(a => Math.max(...a))
     .reduce((max, cur) => Math.max(max, cur), 0)
 
-  return d3
-    .scaleLinear<number>()
+  return scaleLinear<number>()
     .range(range)
     .domain([min, max])
 }
