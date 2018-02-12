@@ -95,7 +95,7 @@ var Chart = /** @class */ (function () {
     };
     Chart.prototype.barChart = function () {
         var _this = this;
-        this.chart.append('g').attr('transform', "translate(\n          " + (this.options.padding.left + this.options.padding.right) + ",\n          " + this.options.padding.top + "\n        )");
+        this.chart.append('g').attr('transform', "translate(\n          " + this.options.padding.left + ",\n          " + this.options.padding.top + "\n        )");
         var x = d3
             .scaleBand()
             .range([
@@ -113,8 +113,8 @@ var Chart = /** @class */ (function () {
                 this.options.padding.bottom,
             0,
         ]);
-        var xAxis = d3.axisBottom(x);
-        var yAxis = d3.axisLeft(y).ticks(10, '%');
+        var xAxis = d3.axisBottom(x).ticks(this.options.tickFormats.x);
+        var yAxis = d3.axisLeft(y).ticks(this.options.tickFormats.y);
         x.domain(this.data.map(function (d) { return d.name; }));
         y.domain([0, d3.max(this.data, function (d) { return d.sales; })]);
         this.chart

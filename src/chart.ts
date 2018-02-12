@@ -75,6 +75,29 @@ export class Chart {
     this.draw(this.options.chartType)
   }
 
+  chartDimensions() {
+    return {
+      width: this.chartWidth(),
+      height: this.chartHeight(),
+    }
+  }
+
+  chartWidth() {
+    return (
+      this.options.width -
+      this.options.padding.left -
+      this.options.padding.right
+    )
+  }
+
+  chartHeight() {
+    return (
+      this.options.height -
+      this.options.padding.top -
+      this.options.padding.bottom
+    )
+  }
+
   private draw(chartType: ChartType) {
     this.chart = d3.select<SVGElement, {}>(this.options.parent)
     this.chart
@@ -105,44 +128,27 @@ export class Chart {
     this.chart.append('g').attr(
       'transform',
       `translate(
-          ${this.options.padding.left + this.options.padding.right},
+          ${this.options.padding.left},
           ${this.options.padding.top}
         )`,
     )
 
-    const x = d3
+    const xScale = d3
       .scaleBand()
-      .range([
-        0,
-        this.options.width -
-          this.options.padding.left -
-          this.options.padding.right,
-      ])
+      .range([0, this.chartWidth()])
       .padding(0.1)
-    const y = d3
-      .scaleLinear()
-      .range([
-        this.options.height -
-          this.options.padding.top -
-          this.options.padding.bottom,
-        0,
-      ])
-    const xAxis = d3.axisBottom(x)
-    const yAxis = d3.axisLeft(y).ticks(10, '%')
+    const yScale = d3.scaleLinear().range([this.chartHeight(), 0])
+    const xAxis = d3.axisBottom(xScale).ticks(this.options.tickFormats.x)
+    const yAxis = d3.axisLeft(yScale).ticks(this.options.tickFormats.y)
 
-    x.domain(this.data.map(d => d.name))
-    y.domain([0, d3.max(this.data, d => d.sales)])
+    xScale.domain(this.data.map(d => d.name))
+    yScale.domain([0, d3.max(this.data, d => d.sales)])
 
     this.chart
       .select('g')
       .append('g')
       .attr('class', 'x axis')
-      .attr(
-        'transform',
-        `translate(0, ${this.options.height -
-          this.options.padding.top -
-          this.options.padding.bottom})`,
-      )
+      .attr('transform', `translate(0, ${this.chartHeight()})`)
       .call(xAxis)
 
     this.chart
@@ -165,17 +171,10 @@ export class Chart {
       .enter()
       .append('rect')
       .attr('class', 'bar')
-      .attr('x', (d: any) => x(d.name))
-      .attr('width', x.bandwidth())
-      .attr('y', (d: any) => y(d.sales))
-      .attr(
-        'height',
-        (d: any) =>
-          this.options.height -
-          this.options.padding.top -
-          this.options.padding.bottom -
-          y(d.sales),
-      )
+      .attr('x', (d: any) => xScale(d.name))
+      .attr('width', xScale.bandwidth())
+      .attr('y', (d: any) => yScale(d.sales))
+      .attr('height', (d: any) => this.chartHeight() - yScale(d.sales))
   }
 
   private donutChart() {
