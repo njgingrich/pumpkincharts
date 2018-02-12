@@ -60,6 +60,10 @@ var Chart = /** @class */ (function () {
             this.data = opts.data.values;
             this.dataType = data_1.DataType.VALUES;
         }
+        else if (opts.data.json) {
+            this.data = opts.data.json;
+            this.dataType = data_1.DataType.JSON;
+        }
         else {
             throw new Error('No valid data type found');
         }
@@ -83,7 +87,72 @@ var Chart = /** @class */ (function () {
                 this.donutChart();
                 break;
             }
+            case data_1.ChartType.BAR: {
+                this.barChart();
+                break;
+            }
         }
+    };
+    Chart.prototype.barChart = function () {
+        var _this = this;
+        this.chart.append('g').attr('transform', "translate(\n          " + (this.options.padding.left + this.options.padding.right) + ",\n          " + this.options.padding.top + "\n        )");
+        var x = d3
+            .scaleBand()
+            .range([
+            0,
+            this.options.width -
+                this.options.padding.left -
+                this.options.padding.right,
+        ])
+            .padding(0.1);
+        var y = d3
+            .scaleLinear()
+            .range([
+            this.options.height -
+                this.options.padding.top -
+                this.options.padding.bottom,
+            0,
+        ]);
+        var xAxis = d3.axisBottom(x);
+        var yAxis = d3.axisLeft(y).ticks(10, '%');
+        x.domain(this.data.map(function (d) { return d.name; }));
+        y.domain([0, d3.max(this.data, function (d) { return d.sales; })]);
+        this.chart
+            .select('g')
+            .append('g')
+            .attr('class', 'x axis')
+            .attr('transform', "translate(0, " + (this.options.height -
+            this.options.padding.top -
+            this.options.padding.bottom) + ")")
+            .call(xAxis);
+        this.chart
+            .select('g')
+            .append('g')
+            .attr('class', 'y axis')
+            .call(yAxis)
+            .append('text')
+            .attr('class', 'label')
+            .attr('transform', 'rotate(-90)')
+            .attr('y', 6)
+            .attr('dy', '.71em')
+            .style('text-anchor', 'end')
+            .text('Frequency');
+        this.chart
+            .select('g')
+            .selectAll('.bar')
+            .data(this.data)
+            .enter()
+            .append('rect')
+            .attr('class', 'bar')
+            .attr('x', function (d) { return x(d.name); })
+            .attr('width', x.bandwidth())
+            .attr('y', function (d) { return y(d.sales); })
+            .attr('height', function (d) {
+            return _this.options.height -
+                _this.options.padding.top -
+                _this.options.padding.bottom -
+                y(d.sales);
+        });
     };
     Chart.prototype.donutChart = function () {
         var color = d3.scaleOrdinal().range(this.options.strokes);

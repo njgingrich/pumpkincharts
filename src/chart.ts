@@ -66,6 +66,9 @@ export class Chart {
     } else if (opts.data.values) {
       this.data = opts.data.values
       this.dataType = DataType.VALUES
+    } else if (opts.data.json) {
+      this.data = opts.data.json
+      this.dataType = DataType.JSON
     } else {
       throw new Error('No valid data type found')
     }
@@ -91,7 +94,88 @@ export class Chart {
         this.donutChart()
         break
       }
+      case ChartType.BAR: {
+        this.barChart()
+        break
+      }
     }
+  }
+
+  private barChart() {
+    this.chart.append('g').attr(
+      'transform',
+      `translate(
+          ${this.options.padding.left + this.options.padding.right},
+          ${this.options.padding.top}
+        )`,
+    )
+
+    const x = d3
+      .scaleBand()
+      .range([
+        0,
+        this.options.width -
+          this.options.padding.left -
+          this.options.padding.right,
+      ])
+      .padding(0.1)
+    const y = d3
+      .scaleLinear()
+      .range([
+        this.options.height -
+          this.options.padding.top -
+          this.options.padding.bottom,
+        0,
+      ])
+    const xAxis = d3.axisBottom(x)
+    const yAxis = d3.axisLeft(y).ticks(10, '%')
+
+    x.domain(this.data.map(d => d.name))
+    y.domain([0, d3.max(this.data, d => d.sales)])
+
+    this.chart
+      .select('g')
+      .append('g')
+      .attr('class', 'x axis')
+      .attr(
+        'transform',
+        `translate(0, ${this.options.height -
+          this.options.padding.top -
+          this.options.padding.bottom})`,
+      )
+      .call(xAxis)
+
+    this.chart
+      .select('g')
+      .append('g')
+      .attr('class', 'y axis')
+      .call(yAxis)
+      .append('text')
+      .attr('class', 'label')
+      .attr('transform', 'rotate(-90)')
+      .attr('y', 6)
+      .attr('dy', '.71em')
+      .style('text-anchor', 'end')
+      .text('Frequency')
+
+    this.chart
+      .select('g')
+      .selectAll('.bar')
+      .data(this.data)
+      .enter()
+      .append('rect')
+      .attr('class', 'bar')
+      .attr('x', (d: any) => x(d.name))
+      .attr('width', x.bandwidth())
+      .attr('y', (d: any) => y(d.sales))
+      .attr(
+        'height',
+        (d: any) =>
+          this.options.height -
+          this.options.padding.top -
+          this.options.padding.bottom -
+          y(d.sales),
+      )
   }
 
   private donutChart() {

@@ -14,10 +14,12 @@ export declare enum DataType {
     COLUMNS = "columns",
     ROWS = "rows",
     VALUES = "values",
+    JSON = "json",
 }
 export interface DataOptions {
     points?: DataPoint[][];
     columns?: number[][];
     rows?: number[][];
     values?: number[];
+    json?: JSON[];
 }

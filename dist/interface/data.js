@@ -14,4 +14,5 @@ var DataType;
     DataType["COLUMNS"] = "columns";
     DataType["ROWS"] = "rows";
     DataType["VALUES"] = "values";
+    DataType["JSON"] = "json";
 })(DataType = exports.DataType || (exports.DataType = {}));

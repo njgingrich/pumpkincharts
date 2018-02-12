@@ -16,6 +16,7 @@ export enum DataType {
   COLUMNS = 'columns',
   ROWS = 'rows',
   VALUES = 'values',
+  JSON = 'json',
 }
 
 export interface DataOptions {
@@ -23,4 +24,5 @@ export interface DataOptions {
   columns?: number[][]
   rows?: number[][]
   values?: number[]
+  json?: JSON[]
 }
