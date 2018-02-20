@@ -286,6 +286,7 @@ export class Chart {
     for (let i = 0; i < lineFunctions.length; i++) {
       this.chart
         .append('path')
+        .attr('class', `line-${i+1}`)
         .attr('d', lineFunctions[i](this.data[i]))
         .attr('stroke', this.options.strokes[i])
         .attr('stroke-width', 2)
