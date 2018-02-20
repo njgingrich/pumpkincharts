@@ -7,11 +7,11 @@ describe('Line chart drawing', function () {
     var chart;
     var args;
     beforeEach(function () {
-        document.body.insertAdjacentHTML('afterbegin', '<svg id="chart"></svg>');
+        document.body.insertAdjacentHTML('afterbegin', '<svg id="testchart"></svg>');
         chart = new chart_1.Chart(args);
     });
     afterEach(function () {
-        var el = document.getElementById('chart');
+        var el = document.getElementById('testchart');
         if (el)
             document.body.removeChild(el);
     });
@@ -23,7 +23,7 @@ describe('Line chart drawing', function () {
                     columns: [[10, 50, 32, 13, 61, 23, 20], [12, 13, 34, 45, 56, 23, 1]],
                 },
                 options: {
-                    parent: '#chart',
+                    parent: '#testchart',
                     chartType: "line",
                     width: 500,
                     height: 300,

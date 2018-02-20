@@ -94,7 +94,8 @@ var Chart = /** @class */ (function () {
         this.redraw();
     };
     Chart.prototype.redraw = function () {
-        d3_selection_1.select(this.options.parent).remove();
+        // select(this.options.parent).selectAll('g').remove()
+        d3_selection_1.select(this.options.parent).selectAll('*').remove();
         this.draw(this.options.chartType);
     };
     Chart.prototype.draw = function (chartType) {

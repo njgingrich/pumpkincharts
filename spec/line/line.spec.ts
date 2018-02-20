@@ -58,15 +58,18 @@ describe('Line chart drawing', () => {
       }, 500)
     })
 
-    it('should redraw axes if ticks change', (done) => {
+    it('can change its size', (done) => {
       setTimeout(() => {
-        let xAxisTicks = document.querySelectorAll('.x.axis > .tick')
-        expect(xAxisTicks.length).to.equal(13)
+        let chartEl = document.getElementById('chart') as HTMLElement
+        expect(chartEl.getAttribute('width')).to.equal('500')
+        expect(chartEl.getAttribute('height')).to.equal('300')
 
-        chart.setOptions({ ticks: 10 })
+        chart.setOptions({ width: 800, height: 800 })
 
-        xAxisTicks = document.querySelectorAll('.x.axis > .tick')
-        expect(xAxisTicks.length).to.equal(10)
+        chartEl = document.getElementById('chart') as HTMLElement
+        expect(chartEl.getAttribute('width')).to.equal('800')
+        expect(chartEl.getAttribute('height')).to.equal('800')
+        done()
       }, 500)
     })
   })

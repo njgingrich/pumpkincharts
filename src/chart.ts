@@ -107,7 +107,7 @@ export class Chart {
   }
 
   public redraw() {
-    select(this.options.parent).remove()
+    select(this.options.parent).selectAll('*').remove()
     this.draw(this.options.chartType)
   }
 
