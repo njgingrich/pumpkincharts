@@ -14,3 +14,4 @@ function getArc(radius, width, height) {
     }
 }
 exports.getArc = getArc;
+//# sourceMappingURL=pie.js.map

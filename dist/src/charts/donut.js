@@ -21,3 +21,4 @@ function getDonut(radius, donut, width, height) {
         .outerRadius(radiusSize);
 }
 exports.getDonut = getDonut;
+//# sourceMappingURL=donut.js.map

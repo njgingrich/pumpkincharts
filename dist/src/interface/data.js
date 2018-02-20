@@ -16,3 +16,4 @@ var DataType;
     DataType["VALUES"] = "values";
     DataType["JSON"] = "json";
 })(DataType = exports.DataType || (exports.DataType = {}));
+//# sourceMappingURL=data.js.map

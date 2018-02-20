@@ -16,7 +16,7 @@ describe('Line chart drawing', () => {
   })
 
   afterEach(() => {
-    const el =  document.getElementById('#chart')
+    const el =  document.getElementById('chart')
     if (el) document.body.removeChild(el)
   })
 
@@ -47,7 +47,7 @@ describe('Line chart drawing', () => {
       done()
     })
 
-    it('should have the same paths', (done) => {
+    it('should have the correct paths', (done) => {
       setTimeout(() => {
         const line1 = document.querySelector('.line-1') as Element
         expect(line1.getAttribute('d')).to.equal('M20,237.37704918032787L96.66666666666666,66.88524590163934L173.33333333333331,143.60655737704917L250,224.59016393442624L326.66666666666663,20L403.33333333333337,181.9672131147541L480,194.75409836065575')
@@ -55,6 +55,18 @@ describe('Line chart drawing', () => {
         const line2 = document.querySelector('.line-2') as Element
         expect(line2.getAttribute('d')).to.equal('M20,228.85245901639345L96.66666666666666,224.59016393442624L173.33333333333331,135.08196721311478L250,88.19672131147539L326.66666666666663,41.31147540983605L403.33333333333337,181.9672131147541L480,275.73770491803276')
         done()
+      }, 500)
+    })
+
+    it('should redraw axes if ticks change', (done) => {
+      setTimeout(() => {
+        let xAxisTicks = document.querySelectorAll('.x.axis > .tick')
+        expect(xAxisTicks.length).to.equal(13)
+
+        chart.setOptions({ ticks: 10 })
+
+        xAxisTicks = document.querySelectorAll('.x.axis > .tick')
+        expect(xAxisTicks.length).to.equal(10)
       }, 500)
     })
   })

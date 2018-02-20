@@ -101,6 +101,16 @@ export class Chart {
     )
   }
 
+  public setOptions(newOptions: any) {
+    this.options = Object.assign(this.options, newOptions)
+    this.redraw()
+  }
+
+  public redraw() {
+    select(this.options.parent).remove()
+    this.draw(this.options.chartType)
+  }
+
   private draw(chartType: ChartType) {
     this.chart = select<SVGElement, {}>(this.options.parent)
     this.chart

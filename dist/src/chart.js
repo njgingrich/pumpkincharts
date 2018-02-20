@@ -89,6 +89,14 @@ var Chart = /** @class */ (function () {
             this.options.padding.top -
             this.options.padding.bottom);
     };
+    Chart.prototype.setOptions = function (newOptions) {
+        this.options = Object.assign(this.options, newOptions);
+        this.redraw();
+    };
+    Chart.prototype.redraw = function () {
+        d3_selection_1.select(this.options.parent).remove();
+        this.draw(this.options.chartType);
+    };
     Chart.prototype.draw = function (chartType) {
         this.chart = d3_selection_1.select(this.options.parent);
         this.chart
@@ -226,6 +234,7 @@ var Chart = /** @class */ (function () {
         for (var i = 0; i < lineFunctions.length; i++) {
             this.chart
                 .append('path')
+                .attr('class', "line-" + (i + 1))
                 .attr('d', lineFunctions[i](this.data[i]))
                 .attr('stroke', this.options.strokes[i])
                 .attr('stroke-width', 2)
@@ -249,3 +258,4 @@ var Chart = /** @class */ (function () {
     return Chart;
 }());
 exports.Chart = Chart;
+//# sourceMappingURL=chart.js.map

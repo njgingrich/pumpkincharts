@@ -69,3 +69,4 @@ function getScales(dataType, data, xRange, yRange) {
     }
 }
 exports.getScales = getScales;
+//# sourceMappingURL=scale.js.map

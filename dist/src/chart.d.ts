@@ -12,6 +12,8 @@ export declare class Chart {
     };
     chartWidth(): number;
     chartHeight(): number;
+    setOptions(newOptions: any): void;
+    redraw(): void;
     private draw(chartType);
     private barChart();
     private donutChart();
