@@ -12,11 +12,9 @@ function linesFromPoints(
     funcs.push(
       line<DataPoint>()
         .x(d => {
-          console.log('d:', d, 'x:', d.x)
           return xScale(d.x)
         })
         .y(d => {
-          console.log('d:', d, 'y:', d.y)
           return yScale(d.y)
         }),
     )

@@ -77,5 +77,14 @@ describe('Line chart drawing', () => {
       expect(count.length).to.equal(3)
       done()
     })
+
+    it('can remove a line', (done) => {
+      chart.remove({
+        columns: [[10, 50, 32, 13, 61, 23, 20]]
+      })
+      const count = document.querySelectorAll('#chart > path')
+      expect(count.length).to.equal(1)
+      done()
+    })
   })
 })
