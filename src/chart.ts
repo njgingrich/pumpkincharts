@@ -3,6 +3,7 @@ import { BaseType, select } from 'd3-selection'
 import { scaleBand, scaleLinear, scaleOrdinal, ScaleLinear } from 'd3-scale'
 import { pie } from 'd3-shape'
 import { axisBottom, axisLeft, Axis } from 'd3-axis'
+import { union } from 'lodash'
 
 import { ChartType, DataType, DataOptions, DataPoint } from './interface/data'
 import { Options, ClassOptions } from './interface/options'
@@ -55,37 +56,40 @@ export class Chart {
     this.options = Object.assign({}, defaultOptions, opts.options)
     this.data = []
     this.chart = {}
+    this.dataType = DataType.COLUMNS
+    this.add(opts.data)
+  }
 
-    if (opts.data.columns) {
-      this.data = opts.data.columns
+  public add(data: DataOptions) {
+    if (data.columns) {
+      this.data = this.data.concat(this.convertColumnsToPoints(data.columns))
       this.dataType = DataType.COLUMNS
-    } else if (opts.data.rows) {
-      this.data = opts.data.rows
-      this.data = this.rotateRows(opts.data.rows)
+    } else if (data.rows) {
+      this.data = this.data.concat(this.rotateRows(data.rows))
       this.dataType = DataType.ROWS
-    } else if (opts.data.points) {
-      this.data = opts.data.points
+    } else if (data.points) {
+      this.data = this.data.concat(data.points)
       this.dataType = DataType.POINTS
-    } else if (opts.data.values) {
-      this.data = opts.data.values
+    } else if (data.values) {
+      this.data = this.data.concat(data.values)
       this.dataType = DataType.VALUES
-    } else if (opts.data.json) {
-      this.data = opts.data.json
+    } else if (data.json) {
+      this.data = this.data.concat(data.json)
       this.dataType = DataType.JSON
     } else {
       throw new Error('No valid data type found')
     }
-    this.draw(this.options.chartType)
+    this.redraw()
   }
 
-  chartDimensions() {
+  public chartDimensions() {
     return {
       width: this.chartWidth(),
       height: this.chartHeight(),
     }
   }
 
-  chartWidth() {
+  public chartWidth() {
     return (
       this.options.width -
       this.options.padding.left -
@@ -93,22 +97,12 @@ export class Chart {
     )
   }
 
-  chartHeight() {
+  public chartHeight() {
     return (
       this.options.height -
       this.options.padding.top -
       this.options.padding.bottom
     )
-  }
-
-  public setOptions(newOptions: any) {
-    this.options = Object.assign(this.options, newOptions)
-    this.redraw()
-  }
-
-  public redraw() {
-    select(this.options.parent).selectAll('*').remove()
-    this.draw(this.options.chartType)
   }
 
   private draw(chartType: ChartType) {
@@ -135,6 +129,16 @@ export class Chart {
         break
       }
     }
+  }
+
+  public redraw() {
+    select(this.options.parent).selectAll('*').remove()
+    this.draw(this.options.chartType)
+  }
+
+  public setOptions(newOptions: any) {
+    this.options = Object.assign(this.options, newOptions)
+    this.redraw()
   }
 
   private barChart() {
@@ -294,11 +298,12 @@ export class Chart {
       .call(yAxis)
 
     for (let i = 0; i < lineFunctions.length; i++) {
+      console.log('drawing data:', this.data[i])
       this.chart
         .append('path')
         .attr('class', `line-${i+1}`)
         .attr('d', lineFunctions[i](this.data[i]))
-        .attr('stroke', this.options.strokes[i])
+        .attr('stroke', this.options.strokes[(i % this.options.strokes.length)])
         .attr('stroke-width', 2)
         .attr('fill', 'none')
     }
@@ -316,5 +321,24 @@ export class Chart {
       }
     }
     return columns
+  }
+
+  /**
+   * i.e. [ [1,2], [3,4] ] to [ [{x:0, y:1}, {x:1, y:2}], [{x:0, y:3}, {x:1, y:4}] ]
+   */
+  private convertColumnsToPoints(columns: number[][]) {
+    let pts = []
+    for (let col of columns) {
+      let objCol = []
+
+      for (let i = 0; i < col.length; i++) {
+        objCol.push({
+          x: i,
+          y: col[i]
+        })
+      }
+      pts.push(objCol)
+    }
+    return pts
   }
 }

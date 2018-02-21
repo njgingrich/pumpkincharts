@@ -11,24 +11,14 @@ function linesFromPoints(
   for (let col of data) {
     funcs.push(
       line<DataPoint>()
-        .x(d => xScale(d.x))
-        .y(d => yScale(d.y)),
-    )
-  }
-  return funcs
-}
-
-function linesFromColumns(
-  data: number[][],
-  xScale: ScaleLinear<number, number>,
-  yScale: ScaleLinear<number, number>,
-) {
-  let funcs = []
-  for (let col of data) {
-    funcs.push(
-      line<number>()
-        .x(d => xScale(col.indexOf(d)))
-        .y(d => yScale(d)),
+        .x(d => {
+          console.log('d:', d, 'x:', d.x)
+          return xScale(d.x)
+        })
+        .y(d => {
+          console.log('d:', d, 'y:', d.y)
+          return yScale(d.y)
+        }),
     )
   }
   return funcs
@@ -36,19 +26,14 @@ function linesFromColumns(
 
 export function getLineFunctions(
   dataType: DataType,
-  data: number[][] | DataPoint[][],
+  data: DataPoint[][],
   xScale: ScaleLinear<number, number>,
   yScale: ScaleLinear<number, number>,
 ): Line<any>[] {
   switch (dataType) {
-    case DataType.POINTS: {
-      return linesFromPoints(data as DataPoint[][], xScale, yScale)
-    }
-    case DataType.COLUMNS: {
-      return linesFromColumns(data as number[][], xScale, yScale)
-    }
-    case DataType.ROWS: {
-      return linesFromColumns(data as number[][], xScale, yScale)
+    // only allow points, rows, or columns for line charts
+    case DataType.POINTS, DataType.ROWS, DataType.COLUMNS: {
+      return linesFromPoints(data, xScale, yScale)
     }
     default: {
       throw new Error('Not a valid data type for line chart')

@@ -7,34 +7,22 @@ function linesFromPoints(data, xScale, yScale) {
     for (var _i = 0, data_2 = data; _i < data_2.length; _i++) {
         var col = data_2[_i];
         funcs.push(d3_shape_1.line()
-            .x(function (d) { return xScale(d.x); })
-            .y(function (d) { return yScale(d.y); }));
-    }
-    return funcs;
-}
-function linesFromColumns(data, xScale, yScale) {
-    var funcs = [];
-    var _loop_1 = function (col) {
-        funcs.push(d3_shape_1.line()
-            .x(function (d) { return xScale(col.indexOf(d)); })
-            .y(function (d) { return yScale(d); }));
-    };
-    for (var _i = 0, data_3 = data; _i < data_3.length; _i++) {
-        var col = data_3[_i];
-        _loop_1(col);
+            .x(function (d) {
+            console.log('d:', d, 'x:', d.x);
+            return xScale(d.x);
+        })
+            .y(function (d) {
+            console.log('d:', d, 'y:', d.y);
+            return yScale(d.y);
+        }));
     }
     return funcs;
 }
 function getLineFunctions(dataType, data, xScale, yScale) {
     switch (dataType) {
-        case data_1.DataType.POINTS: {
+        // only allow points, rows, or columns for line charts
+        case data_1.DataType.POINTS, data_1.DataType.ROWS, data_1.DataType.COLUMNS: {
             return linesFromPoints(data, xScale, yScale);
-        }
-        case data_1.DataType.COLUMNS: {
-            return linesFromColumns(data, xScale, yScale);
-        }
-        case data_1.DataType.ROWS: {
-            return linesFromColumns(data, xScale, yScale);
         }
         default: {
             throw new Error('Not a valid data type for line chart');

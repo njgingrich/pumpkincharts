@@ -47,32 +47,35 @@ var Chart = /** @class */ (function () {
         this.options = Object.assign({}, defaultOptions, opts.options);
         this.data = [];
         this.chart = {};
-        if (opts.data.columns) {
-            this.data = opts.data.columns;
+        this.dataType = data_1.DataType.COLUMNS;
+        this.add(opts.data);
+    }
+    Chart.prototype.add = function (data) {
+        if (data.columns) {
+            this.data = this.data.concat(this.convertColumnsToPoints(data.columns));
             this.dataType = data_1.DataType.COLUMNS;
         }
-        else if (opts.data.rows) {
-            this.data = opts.data.rows;
-            this.data = this.rotateRows(opts.data.rows);
+        else if (data.rows) {
+            this.data = this.data.concat(this.rotateRows(data.rows));
             this.dataType = data_1.DataType.ROWS;
         }
-        else if (opts.data.points) {
-            this.data = opts.data.points;
+        else if (data.points) {
+            this.data = this.data.concat(data.points);
             this.dataType = data_1.DataType.POINTS;
         }
-        else if (opts.data.values) {
-            this.data = opts.data.values;
+        else if (data.values) {
+            this.data = this.data.concat(data.values);
             this.dataType = data_1.DataType.VALUES;
         }
-        else if (opts.data.json) {
-            this.data = opts.data.json;
+        else if (data.json) {
+            this.data = this.data.concat(data.json);
             this.dataType = data_1.DataType.JSON;
         }
         else {
             throw new Error('No valid data type found');
         }
-        this.draw(this.options.chartType);
-    }
+        this.redraw();
+    };
     Chart.prototype.chartDimensions = function () {
         return {
             width: this.chartWidth(),
@@ -88,15 +91,6 @@ var Chart = /** @class */ (function () {
         return (this.options.height -
             this.options.padding.top -
             this.options.padding.bottom);
-    };
-    Chart.prototype.setOptions = function (newOptions) {
-        this.options = Object.assign(this.options, newOptions);
-        this.redraw();
-    };
-    Chart.prototype.redraw = function () {
-        // select(this.options.parent).selectAll('g').remove()
-        d3_selection_1.select(this.options.parent).selectAll('*').remove();
-        this.draw(this.options.chartType);
     };
     Chart.prototype.draw = function (chartType) {
         this.chart = d3_selection_1.select(this.options.parent);
@@ -121,6 +115,14 @@ var Chart = /** @class */ (function () {
                 break;
             }
         }
+    };
+    Chart.prototype.redraw = function () {
+        d3_selection_1.select(this.options.parent).selectAll('*').remove();
+        this.draw(this.options.chartType);
+    };
+    Chart.prototype.setOptions = function (newOptions) {
+        this.options = Object.assign(this.options, newOptions);
+        this.redraw();
     };
     Chart.prototype.barChart = function () {
         var _this = this;
@@ -233,11 +235,12 @@ var Chart = /** @class */ (function () {
             .attr('transform', "translate(" + this.options.padding.left + ", 0)")
             .call(yAxis);
         for (var i = 0; i < lineFunctions.length; i++) {
+            console.log('drawing data:', this.data[i]);
             this.chart
                 .append('path')
                 .attr('class', "line-" + (i + 1))
                 .attr('d', lineFunctions[i](this.data[i]))
-                .attr('stroke', this.options.strokes[i])
+                .attr('stroke', this.options.strokes[(i % this.options.strokes.length)])
                 .attr('stroke-width', 2)
                 .attr('fill', 'none');
         }
@@ -255,6 +258,24 @@ var Chart = /** @class */ (function () {
             }
         }
         return columns;
+    };
+    /**
+     * i.e. [ [1,2], [3,4] ] to [ [{x:0, y:1}, {x:1, y:2}], [{x:0, y:3}, {x:1, y:4}] ]
+     */
+    Chart.prototype.convertColumnsToPoints = function (columns) {
+        var pts = [];
+        for (var _i = 0, columns_1 = columns; _i < columns_1.length; _i++) {
+            var col = columns_1[_i];
+            var objCol = [];
+            for (var i = 0; i < col.length; i++) {
+                objCol.push({
+                    x: i,
+                    y: col[i]
+                });
+            }
+            pts.push(objCol);
+        }
+        return pts;
     };
     return Chart;
 }());
